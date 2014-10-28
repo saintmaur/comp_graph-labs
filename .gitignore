@@ -1,0 +1,4 @@
+*.suo
+*.vcproj.*
+comp_graph-labs/Debug/*
+comp_graph-labs/Release/*
