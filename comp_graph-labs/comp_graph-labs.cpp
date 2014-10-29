@@ -1,4 +1,5 @@
 #include "comp_graph-labs.h"
+#include "getopt.h"
 
 ///////////////////////////////////////////////////////
 const std::string WRONG_TASK_NUM = "Wrong task number.";

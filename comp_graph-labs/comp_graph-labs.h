@@ -1,9 +1,8 @@
-#include "stdio.h"
+#include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
-#include "getopt.h"
 
 struct conf{
 	int id;
@@ -30,9 +29,10 @@ public:
 	// task-specific methods
 	void vect_size();
 	void line_by2p();
+	//TODO: изучить все типы входных структур. Создать соответствующие методы разбора и поля для сохранениея этих структур.
 };
 
-typedef void(solution::*task_handler)();
+typedef void(solution::* task_handler)();
 
 // Связь номера задания и обработчика
 task_handler id_funx_map[12] = {
@@ -55,13 +55,19 @@ public:
 ///////////////////////////////////
 
 solution::solution(const std::string ifile,const std::string ofile){
-	ifs = std::ifstream(ifile.c_str());
-	ofs = std::ofstream(ofile.c_str());
+	//ifs = std::ifstream(ifile.c_str());
+	//ofs = std::ofstream(ofile.c_str());
 }
 
-void solution::vect_size(){
-	ifs >> data;
+solution::~solution(){
+	
 }
+
+
+void solution::vect_size(){
+	
+}
+
 
 void solution::line_by2p(){
 	
@@ -78,4 +84,8 @@ task::task(const conf& cfg){
 
 void task::resolve(){
 	id_funx_map[id];
+}
+
+task::~task(){
+
 }
