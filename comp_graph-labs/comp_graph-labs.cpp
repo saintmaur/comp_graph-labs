@@ -18,23 +18,24 @@ const struct option longopts[] =
 	};
 
 bool check_consist(const conf& ts){
-	int sum = 0;
+	int sum = 2;
 	if (ts.id){
-		sum++;
+		sum += 2;
 	} else {
 		notice_error(WRONG_TASK_NUM,0);
 	}
 	if (ts.ifile.length() > 0){
-		sum++;
+		sum += 2;
 	} else {
 		notice_error(IFILE_NOT_SET,0);
 	}
 	if (ts.ofile.length() > 0){
-		sum++;
+		sum += 2;
 	} else {
 		notice_error(OFILE_NOT_SET,0);
 	}
-	return !(sum%3);
+	bool i = !(sum%8);
+	return i;
 }
 
 void main(int argc, char* argv[])
@@ -65,7 +66,7 @@ void main(int argc, char* argv[])
 				break;
 		}
 	}
-	if (check_consist(cfg)){
+	if (!check_consist(cfg)){
 		task active_task(cfg);
 	}
 	
