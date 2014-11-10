@@ -66,7 +66,9 @@ void main(int argc, char* argv[])
 				break;
 		}
 	}
-	if (!check_consist(cfg)){
+	if (check_consist(cfg)){
+		input_file = cfg.ifile;
+		output_file = cfg.ofile;
 		task active_task(cfg);
 	}
 	
