@@ -1,8 +1,14 @@
+
+// TODO: Определить все парсеры.
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+
+const std::string DATA_STRUCT_ERR_TMPL = "Data structure error: %s\n";
+const std::string BAD_IFSTREAM = "Bad input stream provided\n";
+const std::string BAD_OFSTREAM = "Bad output stream provided\n";
 
 struct conf{
 	int id;
@@ -10,7 +16,7 @@ struct conf{
 	std::string ofile;
 };
 
-void notice_error(std::string msg, bool do_exit){
+void notice_error(std::string msg, bool do_exit = 0){
 	std::cout << msg << std::endl;
 	if (do_exit){
 		exit(1);
@@ -25,16 +31,36 @@ void line_by2p(){
 	printf("A line will soon be found!\n");
 }
 
-//typedef void(solution::* task_handler_t)();
-typedef void(*task_handler_t)();
+/////////////////////////////////////
 // Связь номера задания и обработчика
+// 1. Определяем тип указателя на обработчик
+typedef void(*task_handler_t)();
+// 2. Определяем массив указателей на обработчики вышеозначенного типа
 task_handler_t id_funx_map[13] = {
 	&(vect_size),
 	&(vect_size),
 	&(line_by2p)
 };
+/////////////////////////////////////
 
-//task_handler_t* task_handler = id_funx_map;
+/////////////////////////////////////
+// Класс-родитель для всех парсеров входных данных
+class data_parser{
+protected:
+	std::ifstream ifs;
+public:
+	int counter;
+	data_parser(std::ifstream str);
+	~data_parser();
+	int* parse(int data[]);
+};
+class data_parser_2lines : public data_parser{};
+class data_parser_3lines : public data_parser{};
+class data_parser_N_sim_lines : public data_parser{};
+class data_parser_2N_lines : public data_parser{};
+/////////////////////////////////////
+
+/////////////////////////////////////
 // Класс Задание
 class task{
 private:
@@ -46,40 +72,57 @@ public:
 	task(const conf& cfg);
 	~task();
 	void show_help();
-	//TODO: Создать методы разбора и поля для сохранениея структур данных, соответствующие описанию ниже.
 	/*
 	1)	Набор чисел через пробел
-	2)	1-я строка: N
+	2)	1-я строка: N (определяет кол-во чисел в следующих строках)
 		2-я строка: N чисел через пробел
 		3-я строка: N чисел через пробел
-	3)	1-я строка: N
-		2-я строка: N пар чисел через пробел
-	4)	1-я строка: N
+	3)	1-я строка: N (определяет кол-во чисел в следующих строках)
+		2-я строка: 2N чисел через пробел
+	4)	1-я строка: N (определяет количество последующих строк)
 		2-я строка: 2 числа через пробел
 		...
 		N-я строка: 2 числа через пробел
-	5)	1-я строка: N
+	5)	1-я строка: N (определяет количество последующих строк x2)
 		2-я строка: 6 чисел через пробел
 		3-я строка: 2 числа через пробел
 		...
 		(2N-1)-я строка: 6 чисел через пробел
 		(2N)-я   строка: 2 числа через пробел
-	6)	
-
 	*/
 };
+/////////////////////////////////////
 
 ///////////////////////////////
 // TASK class IMPLEMENTATION //
 ///////////////////////////////
 
-task::task(const conf& cfg){
+task::task(const conf& cfg):ifs(cfg.ifile.c_str()), ofs(cfg.ofile.c_str()){
 	id = cfg.id;
-	//TODO: Создавать входной и выходной потоки
 	task_handler = id_funx_map;
 	(*task_handler[id])();
 }
 
 task::~task(){
 
+}
+
+//////////////////////////////////////
+// DATA_PARSER class IMPLEMENTATION //
+//////////////////////////////////////
+
+data_parser::data_parser(std::ifstream str): ifs(str){}
+
+data_parser::parse(int data[]){
+	if (ifs && !ifs.eof()){
+		//std::string counter;
+		ifs >> counter;
+		int i = 0;
+		while (!ifs.eof()){
+			ifs >> data[i];
+			i++;
+		}
+	} else {
+		notice_error(BAD_IFSTREAM,1);
+	}
 }
