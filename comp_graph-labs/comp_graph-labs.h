@@ -1,10 +1,12 @@
-
-// TODO: Определить все парсеры.
+//TODO: обработка ошибок
+#include <stdarg.h>
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 const std::string DATA_STRUCT_ERR_TMPL = "Data structure error: %s\n";
@@ -32,35 +34,19 @@ std::string output_file = "";
 class data_parser{
 protected:
 	std::ifstream ifs;
-	std::ofstream ofs;
+	FILE * ofh;
 public:
 	int counter;
 	data_parser(std::string ipath,std::string opath);
 	~data_parser();
-	void put_data(){
-		//TODO продумать, как писать сюда
+	void parse(std::vector<float>& data);
+	void put_data(char* format,...){
+		va_list vargs;
+		va_start(vargs,format);
+		vfprintf(ofh,format,vargs);
+		va_end(vargs);
 	};
-	std::vector<int>& parse(std::vector<int>&);
-	std::vector<int>& parse_2lines(std::vector<int>&);
-	std::vector<int>& parse_3lines(std::vector<int>&);
-	std::vector<int>& parse_N_sim_lines(std::vector<int>&);
-	std::vector<int>& parse_2N_lines(std::vector<int>&);
 };
-//class data_parser_2lines : public data_parser{
-//public:
-//	data_parser_2lines(){};
-//	~data_parser_2lines(){};
-//	std::vector<int>& parse(std::vector<int>&){};
-//};
-//class data_parser_3lines : public data_parser{
-//	
-//};
-//class data_parser_N_sim_lines : public data_parser{
-//	
-//};
-//class data_parser_2N_lines : public data_parser{
-//	
-//};
 
 /////////////////////////////////////
 // Обработчики заданий
@@ -68,20 +54,146 @@ void vect_size(){
 	double size = 0;
 	double curr = 0;
 	data_parser parser(input_file,output_file);
-	std::vector<int> data;
+	std::vector<float> data;
 	parser.parse(data);
-	for(std::vector<int>::iterator it = data.begin(); it != data.end(); ++it){
+	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
 		curr = *it;
 		size += pow(curr,2);
 	}
-	parser.put_data(size);
+	parser.put_data("%d",size);
 }
 void line_by2p(){
 	printf("A line will soon be found!\n");
-	data_parser parser(input_file);
-	std::vector<int> data;
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
 	parser.parse(data);
 	std::cout << "--" << data.size() << std::endl;
+}
+
+void circle(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	double radius = data[0];
+	double diam = radius*2;
+	double len = diam*M_PI;
+	double sq = M_PI*(radius*radius);
+	parser.put_data("%.3f, %.3f, %.3f, ", diam, len, sq);
+}
+
+void vect_sum(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int i = 0;
+	int size = data[i++];
+	for(i = 1; i <= size; i++){
+		float p = data[i]+data[size+i];
+		parser.put_data("%.3f ",p);
+	}
+}
+
+void product(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int i = 0;
+	int size = data[i++];
+	for(i = 1; i <= size; i++){
+		float p = data[i]*data[size+i];
+		parser.put_data("%.3f ",p);
+	}
+}
+
+void triangle(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int size = data[0];
+	float p1 = data[1]+data[size+1];
+	float p2 = data[2]+data[size+2];
+	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+	
+	}
+	parser.put_data("%d",1);
+}
+
+void twoc(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int size = data[0];
+	float p1 = data[1]+data[size+1];
+	float p2 = data[2]+data[size+2];
+	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+	
+	}
+	parser.put_data("%d",1);
+}
+
+void triangles(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int size = data[0];
+	float p1 = data[1]+data[size+1];
+	float p2 = data[2]+data[size+2];
+	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+	
+	}
+	parser.put_data("%d",1);
+}
+
+void maxdist(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int size = data[0];
+	float p1 = data[1]+data[size+1];
+	float p2 = data[2]+data[size+2];
+	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+	
+	}
+	parser.put_data("%d",1);
+}
+
+void trianglep(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int size = data[0];
+	float p1 = data[1]+data[size+1];
+	float p2 = data[2]+data[size+2];
+	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+	
+	}
+	parser.put_data("%d",1);
+}
+
+void pifagor(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int size = data[0];
+	float p1 = data[1]+data[size+1];
+	float p2 = data[2]+data[size+2];
+	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+	
+	}
+	parser.put_data("%d",1);
+}
+
+void pack(){
+	data_parser parser(input_file,output_file);
+	std::vector<float> data;
+	parser.parse(data);
+	int size = data[0];
+	float p1 = data[1]+data[size+1];
+	float p2 = data[2]+data[size+2];
+	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+	
+	}
+	parser.put_data("%d",1);
 }
 
 /////////////////////////////////////
@@ -92,7 +204,17 @@ typedef void(*task_handler_t)();
 task_handler_t id_funx_map[13] = {
 	&(vect_size),
 	&(vect_size),
-	&(line_by2p)
+	&(line_by2p),
+	&(circle),
+	&(vect_sum),
+	&(product),
+	&(twoc),
+	&(triangles),
+	&(maxdist),
+	&(trianglep),
+	&(vect_sum),
+	&(pifagor),
+	&(pack),
 };
 /////////////////////////////////////
 
@@ -102,8 +224,6 @@ class task{
 private:
 	int id;
 	task_handler_t* task_handler;
-	std::ifstream ifs;
-	std::ofstream ofs;
 public:
 	task(const conf& cfg);
 	~task();
@@ -133,60 +253,48 @@ public:
 // TASK class IMPLEMENTATION //
 ///////////////////////////////
 
-task::task(const conf& cfg):ifs(cfg.ifile.c_str()), ofs(cfg.ofile.c_str()){
+task::task(const conf& cfg){
 	id = cfg.id;
 	task_handler = id_funx_map;
 	(*task_handler[id])();
 }
 
 task::~task(){
-	ifs.close();
-	ofs.close();
+	printf("\nTask #%d complete\n", id);
 }
 
 //////////////////////////////////////
 // DATA_PARSER class IMPLEMENTATION //
 //////////////////////////////////////
 
-data_parser::data_parser(std::string ipath,std::string opath): ifs(ipath.c_str()), ofs(opath.c_str()){
+data_parser::data_parser(std::string ipath,std::string opath): ifs(ipath.c_str()){
 	if (!ifs){
 		notice_error(BAD_IFSTREAM,1);
 	}
-	if (!ofs){
+	ofh = fopen(opath.c_str(),"a+");
+	if (!ofh){
 		notice_error(BAD_OFSTREAM,1);
 	}
 }
 
 data_parser::~data_parser(){
-	ifs.close();
-	ofs.close();
+	if(ifs) ifs.close();
+	if(ofh) fclose(ofh);
 };
 
-std::vector<int>& data_parser::parse(std::vector<int>& data){
-
+void data_parser::parse(std::vector<float>& data){
 	if (ifs && !ifs.eof()){
 		int i = 0;
-		int val = 0;
+		float val = 0;
 		while (!ifs.eof()){
 			ifs >> val;
 			//std::cout << "Value : \"" << val << "\"" << std::endl;
 			data.push_back(val);
 		}
+		for (std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+			std::cout << *it << std::endl;
+		}
 	} else {
 		notice_error(BAD_IFSTREAM,1);
 	}
-	return data;
 }
-
-std::vector<int>& data_parser::parse_2lines(std::vector<int>& data){
-	return data;
-};
-std::vector<int>& data_parser::parse_3lines(std::vector<int>& data){
-	return data;
-};
-std::vector<int>& data_parser::parse_N_sim_lines(std::vector<int>& data){
-	return data;
-};
-std::vector<int>& data_parser::parse_2N_lines(std::vector<int>& data){
-	return data;
-};
