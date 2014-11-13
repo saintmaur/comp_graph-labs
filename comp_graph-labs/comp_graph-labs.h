@@ -62,7 +62,7 @@ void vect_size(){
 	}
 	parser.put_data("%d",size);
 }
-void line_by2p(){
+void line(){
 	printf("A line will soon be found!\n");
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
@@ -109,12 +109,9 @@ void triangle(){
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
 	parser.parse(data);
-	int size = data[0];
-	float p1 = data[1]+data[size+1];
-	float p2 = data[2]+data[size+2];
-	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
+	int width = (int)data[0];
+	int height = (int)data[1];
 	
-	}
 	parser.put_data("%d",1);
 }
 
@@ -122,22 +119,106 @@ void twoc(){
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
 	parser.parse(data);
-	int size = data[0];
-	float p1 = data[1]+data[size+1];
-	float p2 = data[2]+data[size+2];
-	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
 	
+	float x1 = data[0];
+	float y1 = data[1];
+	float x2 = data[2];
+	float y2 = data[3];
+	float r1 = data[4];
+	float r2 = data[5];
+	std::string msg = "";
+	// расстояние между центрами окр-тей
+	float d = sqrt(pow((x1-x2),2) + pow((y1-y2),2));
+	if( d == (r1+r2) ){
+		msg = "Tangent: output";
+	} else if (d > (r1+r2)) {
+		msg = "Too far";
+	} else {//if (d < (r1+r2) ) {
+		if(d < abs(r1-r2) ) {
+			if (r1 > r2) {
+				msg = "2 inside 1";
+			} else if (r1 < r2) {
+				msg = "1 inside 2";
+			}
+		} else if (d > abs(r1 - r2) ) {
+			msg = "Intersect";
+		} else {
+			if (r1 > r2) {
+				msg = "Tangent: 2 in 1";
+			} else if (r1 < r2) {
+				msg = "Tangent: 2 in 1";
+			} else {
+				msg = "Full congruence";
+			}
+		}
 	}
-	parser.put_data("%d",1);
+	printf("%s\n",msg.c_str());
+	parser.put_data("%s",msg.c_str());
 }
 
 void triangles(){
+	// вспомогательная структура для фиксирования нужных данных
+	struct triangle_min{
+		float perimeter;
+		int point1;
+		int point2;
+		int point3;
+	};
+	triangle_min tm;
+
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
 	parser.parse(data);
-	int size = data[0];
-	float p1 = data[1]+data[size+1];
-	float p2 = data[2]+data[size+2];
+	
+	int points_c = data[0]; // количество точек
+	// квадратная симметричная матрица, где на главной диагонали указаны номера точек, 
+	// расстояние до которых (и от которых) минимально для текущей точки
+	float **lengths = new float*[points_c];
+	//
+	bool found_points = false;
+	int p1,p2,p3;
+	float perimeter_temp;
+	// инициализируем мин.длину реальным значением
+	float min_len = sqrt(pow((data[1] - data[3]), 2) + pow( (data[2] - data[4]), 2));
+	for(int i = 1; i < points_c; i++){
+		p1 = i-1;
+		while(found_points){
+			// по выходе из цикла имеем минимальное расстояние от текущей точки и номер второй точки
+			for(int j = 1; j < points_c; j++){
+				if( (data[i] != data[j]) &&  (data[i+1] != data[j+1])){
+					float len = sqrt(pow((data[i] - data[j]), 2) + pow( (data[i+1] - data[j+1]), 2));
+					lengths[i-1][j-1] = lengths[j-1][i-1] = len;
+					if (min_len > len){
+						min_len = len;
+						lengths[i-1][i-1] = j;
+					}
+				}
+			}
+			p2 = lengths[i-1][i-1];
+			i = lengths[i-1][i-1];
+			// по выходе из цикла имеем минимальное расстояние от второй точки и номер третьей точки
+			for(int j = 1; j < points_c; j++){
+				if( (data[i] != data[j]) &&  (data[i+1] != data[j+1])){
+					float len = sqrt(pow((data[i] - data[j]), 2) + pow( (data[i+1] - data[j+1]), 2));
+					lengths[i-1][j-1] = lengths[j-1][i-1] = len;
+					if (min_len < len){
+						min_len = len;
+						lengths[i-1][i-1] = j;
+					}
+				}
+			}
+			p3 = lengths[i-1][i-1];
+			perimeter_temp = lengths[p1][(int)lengths[p1][p1]] + lengths[p2][(int)lengths[p2][p2]] + lengths[p3][p1];
+			found_points = true;
+		}
+		if (perimeter_temp < tm.perimeter){
+			tm.perimeter = perimeter_temp;
+			tm.point1 = p1+1;
+			tm.point2 = p2+1;
+			tm.point3 = p3+1;
+		}
+		i+=2;
+	}
 	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
 	
 	}
@@ -202,19 +283,19 @@ void pack(){
 typedef void(*task_handler_t)();
 // 2. Определяем массив указателей на обработчики вышеозначенного типа
 task_handler_t id_funx_map[13] = {
-	&(vect_size),
-	&(vect_size),
-	&(line_by2p),
-	&(circle),
-	&(vect_sum),
-	&(product),
-	&(twoc),
-	&(triangles),
-	&(maxdist),
-	&(trianglep),
-	&(vect_sum),
-	&(pifagor),
-	&(pack),
+	&(vect_size), //0
+	&(vect_size), // 1
+	&(line),      // 2
+	&(circle),    // 3
+	&(vect_sum),  // 4
+	&(product),   // 5
+	&(triangle),  // 6
+	&(twoc),      // 7
+	&(triangles), // 8
+	&(maxdist),   // 9
+	&(trianglep), // 10
+	&(pifagor),   // 11
+	&(pack),      // 12
 };
 /////////////////////////////////////
 
