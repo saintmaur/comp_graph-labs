@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <limits>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -86,7 +87,7 @@ void vect_sum(){
 	std::vector<float> data;
 	parser.parse(data);
 	int i = 0;
-	int size = data[i++];
+	int size = (int)data[i++];
 	for(i = 1; i <= size; i++){
 		float p = data[i]+data[size+i];
 		parser.put_data("%.3f ",p);
@@ -98,7 +99,7 @@ void product(){
 	std::vector<float> data;
 	parser.parse(data);
 	int i = 0;
-	int size = data[i++];
+	int size = (int)data[i++];
 	for(i = 1; i <= size; i++){
 		float p = data[i]*data[size+i];
 		parser.put_data("%.3f ",p);
@@ -165,71 +166,91 @@ void triangles(){
 		int point3;
 	};
 	triangle_min tm;
-
+	
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
 	parser.parse(data);
-	
-	int points_c = data[0]; // количество точек
+	tm.perimeter = std::numeric_limits<float>::infinity();
+	tm.point1 = 0;
+	tm.point2 = 0;
+	tm.point3 = 0;
+	int points_c = (int)data[0];
+	int vals_c = (int)pow(data[0],2); // количество точек
 	// квадратная симметричная матрица, где на главной диагонали указаны номера точек, 
 	// расстояние до которых (и от которых) минимально для текущей точки
-	float **lengths = new float*[points_c];
+	float **lengths = new float*[sizeof(float)*points_c];
+	for(int i=0; i < points_c; i++){
+		lengths[i] = new float[sizeof(float)*points_c];
+	}
+	//std::vector<std::vector<float>> lengths;
 	//
-	bool found_points = false;
 	int p1,p2,p3;
-	float perimeter_temp;
+	float perimeter_temp = std::numeric_limits<float>::infinity();;
 	// инициализируем мин.длину реальным значением
-	float min_len = sqrt(pow((data[1] - data[3]), 2) + pow( (data[2] - data[4]), 2));
-	for(int i = 1; i < points_c; i++){
+	float min_len = std::numeric_limits<float>::infinity();
+
+	int c11, c12, c21, c22;
+	for(int i = 1; i <= points_c; i++){
 		p1 = i-1;
-		while(found_points){
-			// по выходе из цикла имеем минимальное расстояние от текущей точки и номер второй точки
-			for(int j = 1; j < points_c; j++){
-				if( (data[i] != data[j]) &&  (data[i+1] != data[j+1])){
-					float len = sqrt(pow((data[i] - data[j]), 2) + pow( (data[i+1] - data[j+1]), 2));
-					lengths[i-1][j-1] = lengths[j-1][i-1] = len;
-					if (min_len > len){
-						min_len = len;
-						lengths[i-1][i-1] = j;
-					}
+		min_len = std::numeric_limits<float>::infinity();
+		// по выходе из цикла имеем минимальное расстояние от текущей точки и номер второй точки
+		for(int j = 1; j <= points_c; j++){
+			c11 = (int)(i*2-1);
+			c12 = (int)(i*2);
+			c21 = (int)(j*2-1);
+			c22 = (int)(j*2);
+			if( (i != j) && 
+			(	(data[c11] != data[c21]) ||  
+				(data[c12] != data[c22]) 
+			 )){
+				float len = sqrt(pow((data[c11] - data[c21]), 2) + pow( (data[c12] - data[c22]), 2));
+				lengths[i-1][j-1] = lengths[j-1][i-1] = len;
+				if (min_len > len){
+					min_len = len;
+					lengths[i-1][i-1] = j-1;
 				}
 			}
-			p2 = lengths[i-1][i-1];
-			i = lengths[i-1][i-1];
-			// по выходе из цикла имеем минимальное расстояние от второй точки и номер третьей точки
-			for(int j = 1; j < points_c; j++){
-				if( (data[i] != data[j]) &&  (data[i+1] != data[j+1])){
-					float len = sqrt(pow((data[i] - data[j]), 2) + pow( (data[i+1] - data[j+1]), 2));
-					lengths[i-1][j-1] = lengths[j-1][i-1] = len;
-					if (min_len < len){
-						min_len = len;
-						lengths[i-1][i-1] = j;
-					}
-				}
-			}
-			p3 = lengths[i-1][i-1];
-			perimeter_temp = lengths[p1][(int)lengths[p1][p1]] + lengths[p2][(int)lengths[p2][p2]] + lengths[p3][p1];
-			found_points = true;
 		}
+		p2 = lengths[i-1][i-1];
+		int k = lengths[i-1][i-1]+1;
+		c11 = (int)(k*2-1);
+		c12 = (int)(k*2);
+		min_len = std::numeric_limits<float>::infinity();
+		// по выходе из цикла имеем минимальное расстояние от второй точки и номер третьей точки
+		for(int j = 1; j <= points_c; j++){
+			c21 = (int)(j*2-1);
+			c22 = (int)(j*2);
+			if( (k != j) && (j != i) &&
+			(	(data[c11] != data[c21]) ||  
+				(data[c12] != data[c22]) )
+			 ){
+				float len = sqrt(pow((data[c11] - data[c21]), 2) + pow( (data[c12] - data[c22]), 2));
+				lengths[k][j-1] = lengths[j-1][k] = len;
+				if (min_len > len){
+					min_len = len;
+					lengths[k][k] = j-1;
+				}
+			}
+		}
+		p3 = lengths[k][k];
+		perimeter_temp = lengths[p1][(int)lengths[p1][p1]] + lengths[p2][(int)lengths[p2][p2]] + lengths[p3][p1];
+	
 		if (perimeter_temp < tm.perimeter){
 			tm.perimeter = perimeter_temp;
 			tm.point1 = p1+1;
 			tm.point2 = p2+1;
 			tm.point3 = p3+1;
 		}
-		i+=2;
 	}
-	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
-	
-	}
-	parser.put_data("%d",1);
+	delete [] lengths;
+	parser.put_data("%f %d,%d,%d", tm.perimeter, tm.point1,tm.point2,tm.point3);
 }
 
 void maxdist(){
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
 	parser.parse(data);
-	int size = data[0];
+	int size = (int)data[0];
 	float p1 = data[1]+data[size+1];
 	float p2 = data[2]+data[size+2];
 	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
@@ -242,7 +263,7 @@ void trianglep(){
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
 	parser.parse(data);
-	int size = data[0];
+	int size = (int)data[0];
 	float p1 = data[1]+data[size+1];
 	float p2 = data[2]+data[size+2];
 	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
@@ -255,7 +276,7 @@ void pifagor(){
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
 	parser.parse(data);
-	int size = data[0];
+	int size = (int)data[0];
 	float p1 = data[1]+data[size+1];
 	float p2 = data[2]+data[size+2];
 	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
@@ -268,7 +289,7 @@ void pack(){
 	data_parser parser(input_file,output_file);
 	std::vector<float> data;
 	parser.parse(data);
-	int size = data[0];
+	int size = (int)data[0];
 	float p1 = data[1]+data[size+1];
 	float p2 = data[2]+data[size+2];
 	for(std::vector<float>::iterator it = data.begin(); it != data.end(); ++it){
